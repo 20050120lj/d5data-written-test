@@ -1,0 +1,16 @@
+# Runtime dependencies for the two crawlers in this directory.
+# Both crawlers drive a real Chrome/Chromium instance on this machine.
+#
+# Playwright: uses the locally installed Google Chrome (channel="chrome")
+#             and falls back to Playwright's bundled Chromium if Chrome is absent
+#             (then run: python -m playwright install chromium).
+# DrissionPage: attaches to the local Chrome binary directly, no extra download.
+
+playwright>=1.45,<2
+DrissionPage>=4.1,<5
+requests>=2.31
+
+# Only used while exploring/parsing the page by hand (not imported at runtime
+# by either crawler script):
+# beautifulsoup4>=4.12
+# lxml>=5.0

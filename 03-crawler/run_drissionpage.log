@@ -1,0 +1,51 @@
+20:02:58 [INFO] start: limit=20 out=blogs_drissionpage.csv
+20:03:02 [INFO] disqus.com unreachable (ConnectionError: HTTPSConnectionPool(host='disqus.com', port=443): Max retries exceeded with url: / (Caused by ReadTimeoutError("HTTPSCon) -> comment counts stay 0
+20:03:02 [INFO] skip Disqus wait, comment counts will be 0
+20:03:02 [INFO] using browser binary: C:\Program Files\Google\Chrome\Application\chrome.exe
+20:03:05 [INFO] list page 1: https://mitadmissions.org/blogs/
+20:03:15 [INFO]   -> 16 cards on page
+20:03:15 [INFO] list page 2: https://mitadmissions.org/blogs/page/2/
+20:03:18 [INFO]   -> 16 cards on page
+20:03:18 [INFO] 20 unique article URLs queued
+20:03:18 [INFO] [1/20] https://mitadmissions.org/blogs/entry/slinging-pis/
+20:03:30 [INFO]   ok title='Slinging π’s' author="Nicholas R. '29" time=2026-11-10 images=0 content_chars=4220
+20:03:32 [INFO] [2/20] https://mitadmissions.org/blogs/entry/something-to-believe-in/
+20:03:33 [INFO]   ok title='Something to believe in' author="Janet G. '27" time=2026-11-09 images=59 content_chars=8004
+20:03:35 [INFO] [3/20] https://mitadmissions.org/blogs/entry/windows-in-the-color-of-the-sky/
+20:03:37 [INFO]   ok title='windows in the color of the sky' author="Ellie F. '28" time=2026-11-05 images=10 content_chars=647
+20:03:39 [INFO] [4/20] https://mitadmissions.org/blogs/entry/6-reasons-to-join-the-circus/
+20:03:41 [INFO]   ok title='6 reasons to join the circus' author="Joy X. '29" time=2026-11-04 images=13 content_chars=8004
+20:03:43 [INFO] [5/20] https://mitadmissions.org/blogs/entry/apple-picking-in-october/
+20:03:46 [INFO]   ok title='apple picking in october' author="Suzuko O. '30" time=2026-11-03 images=14 content_chars=8004
+20:03:47 [INFO] [6/20] https://mitadmissions.org/blogs/entry/bentry-picnic/
+20:03:49 [INFO]   ok title='bentry picnic' author="Alejandro B. '30" time=2026-11-02 images=2 content_chars=4728
+20:03:51 [INFO] [7/20] https://mitadmissions.org/blogs/entry/hallo-me-en/
+20:03:53 [INFO]   ok title='Hallo-ME-en' author="Aiden H. '28" time=2026-11-01 images=12 content_chars=4762
+20:03:55 [INFO] [8/20] https://mitadmissions.org/blogs/entry/how-i-won-a-costume-contest/
+20:03:57 [INFO]   ok title='How I Won a Costume Contest' author="Leya E. '30" time=2026-11-01 images=5 content_chars=5835
+20:03:59 [INFO] [9/20] https://mitadmissions.org/blogs/entry/halloweekend-2/
+20:04:01 [INFO]   ok title='Halloweekend' author="Nicholas R. '29" time=2026-10-31 images=12 content_chars=3462
+20:04:03 [INFO] [10/20] https://mitadmissions.org/blogs/entry/everything-works-out-in-the-end/
+20:04:15 [INFO]   ok title='Everything Works Out in the End' author="Richard O. '28" time=2026-10-31 images=0 content_chars=3160
+20:04:17 [INFO] [11/20] https://mitadmissions.org/blogs/entry/hit-submit-and-go-frolic-in-the-leaves/
+20:04:19 [INFO]   ok title='hit submit and go frolic in the leaves' author="Leanne F. '30" time=2026-10-31 images=7 content_chars=6023
+20:04:20 [INFO] [12/20] https://mitadmissions.org/blogs/entry/fall-is-the-best-season/
+20:04:22 [INFO]   ok title='fall is the best season' author="Hala K. '29" time=2026-10-31 images=12 content_chars=2669
+20:04:24 [INFO] [13/20] https://mitadmissions.org/blogs/entry/how-to-become-paulie-bleeker/
+20:04:27 [INFO]   ok title='how to become paulie bleeker' author="Emily P. '28" time=2026-10-30 images=18 content_chars=5428
+20:04:29 [INFO] [14/20] https://mitadmissions.org/blogs/entry/i-have-never-been-this-unprepared-for-a-test/
+20:04:41 [INFO]   ok title='i have never been this unprepared for a test' author="Suzuko O. '30" time=2026-10-28 images=0 content_chars=3236
+20:04:43 [INFO] [15/20] https://mitadmissions.org/blogs/entry/chasing-butterflies/
+20:04:46 [INFO]   ok title='Chasing Butterflies' author="Allison E. '27" time=2026-10-28 images=1 content_chars=8004
+20:04:48 [INFO] [16/20] https://mitadmissions.org/blogs/entry/dream/
+20:04:50 [INFO]   ok title='dream' author="Anika H. '26, MEng '27" time=2026-10-25 images=5 content_chars=34
+20:04:52 [INFO] [17/20] https://mitadmissions.org/blogs/entry/massachusetts-institute-of-eggs/
+20:04:54 [INFO]   ok title='Massachusetts Institute of Eggs' author="Leanne F. '30" time=2026-10-21 images=33 content_chars=8004
+20:04:56 [INFO] [18/20] https://mitadmissions.org/blogs/entry/how-to-cure-a-cough/
+20:05:09 [INFO]   ok title='How to cure a cough' author="Allison E. '27" time=2026-10-21 images=0 content_chars=8004
+20:05:11 [INFO] [19/20] https://mitadmissions.org/blogs/entry/an-arrangement-i-worked-on-for-video-game-orchestra/
+20:05:14 [INFO]   ok title='an arrangement i worked on for video game orchestra!' author="Victor D. '27" time=2026-10-18 images=1 content_chars=3180
+20:05:16 [INFO] [20/20] https://mitadmissions.org/blogs/entry/frosh-scavenger-hunt-liveblog-aaaaaaaaaa/
+20:05:18 [INFO]   ok title='FROSH SCAVENGER HUNT LIVEBLOG AAAAAAAAAA' author="Suzuko O. '30" time=2026-10-17 images=15 content_chars=2738
+20:05:21 [INFO] wrote 20 rows to C:\Users\lj20050120\Desktop\笔试\题目作业\03-crawler\blogs_drissionpage.csv (139.2s)
+20:05:21 [INFO] done

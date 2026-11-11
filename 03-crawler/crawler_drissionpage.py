@@ -24,7 +24,7 @@ from urllib.parse import urljoin
 
 import requests
 from DrissionPage import ChromiumOptions, ChromiumPage
-from DrissionPage.errors import ElementNotFoundError, PageDisconnectedError
+from DrissionPage.errors import ElementNotFoundError
 
 BASE_URL = "https://mitadmissions.org/blogs/"
 USER_AGENT = (
@@ -128,15 +128,40 @@ def build_page(headless: bool) -> ChromiumPage:
     opts.set_argument("--disable-gpu")
     opts.set_argument(f"--user-agent={USER_AGENT}")
     opts.set_argument("--lang=en-US")
-    opts.set_timeouts(base=30, page_load=30, script=30)
+    # Block third-party scripts at DNS level. Without this the Disqus embed keeps
+    # the load event pending for ~70s per page, which is what made the first run
+    # look "hung". Mapping them to 127.0.0.1 fails fast instead of timing out.
+    opts.set_argument(
+        "--host-resolver-rules="
+        "MAP disqus.com 127.0.0.1, MAP *.disqus.com 127.0.0.1, "
+        "MAP *.google-analytics.com 127.0.0.1, MAP *.googletagmanager.com 127.0.0.1, "
+        "MAP *.doubleclick.net 127.0.0.1, MAP *.facebook.net 127.0.0.1"
+    )
+    opts.set_timeouts(base=10, page_load=15, script=10)
     opts.auto_port()
     page = ChromiumPage(opts)
-    # Don't block on third-party resources (Disqus embed never resolves here).
+    # Don't block on third-party resources (the Disqus embed never resolves here).
+    # load_mode=none returns as soon as the request is committed; we then wait for
+    # the specific element we need instead of for the full load event.
     try:
-        page.set.load_mode.eager()
-    except Exception:  # noqa: BLE001
-        pass
+        page.set.load_mode.none()
+    except Exception as exc:  # noqa: BLE001
+        log.warning("could not switch load_mode to 'none': %s", exc)
     return page
+
+
+def load(page: ChromiumPage, url: str, selector: str, timeout: float = 20) -> None:
+    """get() + wait for `selector`, with one retry on a broken/failed load."""
+    last: Exception | None = None
+    for attempt in (1, 2):
+        try:
+            page.get(url, timeout=30)
+            page.wait.ele_displayed(selector, timeout=timeout)
+            return
+        except Exception as exc:  # noqa: BLE001
+            last = exc
+            log.warning("  load attempt %d for %s failed: %s", attempt, url, type(exc).__name__)
+    raise last if last else RuntimeError(f"cannot load {url}")
 
 
 # --------------------------------------------------------------------------- #
@@ -183,14 +208,19 @@ def walk_list(page: ChromiumPage, limit: int) -> list[dict]:
 
     while url and len(collected) < limit:
         log.info("list page %d: %s", page_no, url)
-        page.get(url)
-        page.wait.doc_loaded(timeout=45)
         try:
-            page.wait.ele_displayed("css:li.tease-feed-item", timeout=20)
-        except Exception:  # noqa: BLE001
-            log.warning("  no article cards found on %s", url)
+            load(page, url, "css:li.tease-feed-item", timeout=25)
+        except Exception as exc:  # noqa: BLE001
+            log.error("  list page unusable (%s: %s), stopping pagination",
+                      type(exc).__name__, str(exc)[:120])
+            break
 
-        rows = read_list_page(page)
+        try:
+            rows = read_list_page(page)
+        except Exception as exc:  # noqa: BLE001 - tab crash / disconnect
+            log.error("  reading cards failed (%s: %s), stopping pagination",
+                      type(exc).__name__, str(exc)[:120])
+            break
         log.info("  -> %d cards on page", len(rows))
         for row in rows:
             if row["url"] in seen:
@@ -213,10 +243,9 @@ def walk_list(page: ChromiumPage, limit: int) -> list[dict]:
 # detail page
 # --------------------------------------------------------------------------- #
 def read_detail(page: ChromiumPage, url: str, wait_disqus: bool) -> dict:
-    page.get(url, timeout=30)
-    page.wait.doc_loaded(timeout=30)
+    load(page, url, "css:div.article__body", timeout=25)
 
-    body = page.ele("css:div.article__body", timeout=20)
+    body = page.ele("css:div.article__body", timeout=10)
     if body is None or not body:
         raise ElementNotFoundError("div.article__body not found")
 
