@@ -12,14 +12,16 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 import logging
+import os
 import random
 import re
 import sys
 import time
 from pathlib import Path
 from typing import Any
-from urllib.parse import urljoin
+from urllib.parse import urljoin, quote
 
 import requests
 from playwright.sync_api import TimeoutError as PlaywrightTimeout
@@ -85,19 +87,86 @@ def parse_comment_count(text: str | None) -> int:
         return 0
 
 
-def disqus_reachable(timeout: float = 4.0) -> bool:
+def disqus_reachable(timeout: float = 6.0, proxy: str | None = None) -> bool:
     """Comment counts come from disqus.com (client side). Probe once.
 
     If the host is unreachable from this machine we skip the per-article wait
     and record 0 instead of sleeping several seconds on every page.
     """
     try:
-        requests.head("https://disqus.com/", timeout=timeout)
+        sess = requests.Session()
+        sess.trust_env = False
+        if proxy:
+            sess.proxies = {"http": proxy, "https": proxy}
+        sess.head("https://disqus.com/", timeout=timeout)
         return True
     except Exception as exc:  # noqa: BLE001 - any network error means "no"
         log.info("disqus.com unreachable (%s: %s) -> comment counts stay 0",
                  type(exc).__name__, str(exc)[:120])
         return False
+
+
+DISQUS_COUNT_URL = "https://mitadmissions.disqus.com/count-data.js"
+
+
+def fetch_comment_counts(rows: list[dict[str, Any]], proxy: str | None) -> int:
+    """Resolve real comment counts through the Disqus public counter endpoint.
+
+    Why not read it off the page: `#disqus_thread` is filled by `embed.js`, which
+    in headless Chrome frequently never resolves -- measured here as a 15 s wait
+    that ends with an empty anchor even when the proxy works. The counter
+    endpoint returns the authoritative number for the same thread identifier, in
+    one request per article, independent of JS.
+
+    Returns the number of rows that received a real (non-fallback) count.
+    """
+    sess = requests.Session()
+    # The host injects its own HTTP(S)_PROXY; letting requests merge that with the
+    # explicit proxy produced sporadic SSLEOFError. Pin one proxy and ignore env.
+    sess.trust_env = False
+    if proxy:
+        sess.proxies = {"http": proxy, "https": proxy}
+    sess.headers.update({"User-Agent": USER_AGENT, "Referer": BASE_URL})
+
+    resolved = 0
+    for row in rows:
+        ident = row.get("_identifier") or ""
+        if not ident:
+            continue
+        # The proxy drops a request now and then (measured ~1 in 15); retry
+        # rather than silently leaving a wrong 0 in a data column.
+        for attempt in range(3):
+            try:
+                resp = sess.get(f"{DISQUS_COUNT_URL}?1={quote(ident, safe='')}", timeout=15)
+                resp.raise_for_status()
+                m = re.search(r'"counts":\s*(\[.*?\])', resp.text, re.S)
+                if not m:
+                    break
+                arr = json.loads(m.group(1))
+                if arr:
+                    row["Comment Count"] = int(arr[0].get("comments", 0))
+                row["_comment_source"] = "disqus-api"
+                resolved += 1
+                break
+            except Exception as exc:  # noqa: BLE001 - a bad row must not kill the run
+                if attempt == 2:
+                    log.warning("  comment lookup failed for %s: %s: %s",
+                                row.get("URL", "?"), type(exc).__name__, str(exc)[:100])
+                else:
+                    time.sleep(1.0)
+    log.info("comment counts resolved via Disqus API: %d/%d", resolved, len(rows))
+    return resolved
+
+
+def resolve_proxy(cli_value: str | None) -> str | None:
+    """--proxy wins, then HTTPS_PROXY/HTTP_PROXY from the environment."""
+    if cli_value:
+        return cli_value
+    for key in ("HTTPS_PROXY", "https_proxy", "HTTP_PROXY", "http_proxy"):
+        value = os.environ.get(key)
+        if value:
+            return value
+    return None
 
 
 # --------------------------------------------------------------------------- #
@@ -202,7 +271,11 @@ DETAIL_JS = r"""
                     document.querySelector('.tease__comment-text a');
   const comments = commentEl ? commentEl.innerText : '';
 
-  return {title, author, time, content, urls, comments};
+  // Disqus records each thread under "this.page.identifier"; the counter API
+  // keys on that string, so it has to be captured while the page is open.
+  const mi = document.documentElement.innerHTML.match(/this\.page\.identifier\s*=\s*'([^']*)'/);
+  return {title, author, time, content, urls, comments,
+          identifier: mi ? mi[1] : null};
 }
 """
 
@@ -250,6 +323,7 @@ def scrape_detail(page: Any, url: str, wait_disqus: bool) -> dict[str, Any]:
         "Images In Article": len(image_urls),
         "Image URLs": " | ".join(image_urls),
         "URL": url,
+        "_identifier": raw.get("identifier") or "",
     }
 
 
@@ -275,14 +349,20 @@ def main() -> int:
     ap.add_argument("--log", default="run_playwright.log", help="log file path")
     ap.add_argument("--headless", default="1", help="1 = headless (default), 0 = show browser")
     ap.add_argument("--slow", type=float, default=1.4, help="base sleep seconds between articles")
+    ap.add_argument("--proxy", default=None,
+                    help="HTTP proxy for the Disqus counter API, e.g. http://127.0.0.1:7897 "
+                         "(defaults to $HTTPS_PROXY)")
     args = ap.parse_args()
 
     setup_logging(Path(args.log))
     log.info("start: limit=%d out=%s", args.limit, args.out)
 
-    reachable = disqus_reachable()
+    proxy = resolve_proxy(args.proxy)
+    if proxy:
+        log.info("using proxy for Disqus: %s", proxy)
+    reachable = disqus_reachable(proxy=proxy)
     if not reachable:
-        log.info("comment counts will be written as 0 (Disqus is rendered client-side only)")
+        log.info("disqus.com unreachable -> comment counts will stay 0")
 
     rows: list[dict[str, Any]] = []
     started = time.time()
@@ -339,9 +419,13 @@ def main() -> int:
             context.close()
             browser.close()
 
+    # Always try: the probe is advisory only. A single failed probe (observed as
+    # SSLEOFError right after the browser starts) must not zero out the whole run.
+    fetch_comment_counts(rows, proxy)
+
     out_path = Path(args.out)
     with out_path.open("w", newline="", encoding="utf-8-sig") as fh:
-        writer = csv.DictWriter(fh, fieldnames=HEADERS)
+        writer = csv.DictWriter(fh, fieldnames=HEADERS, extrasaction="ignore")
         writer.writeheader()
         writer.writerows(rows)
 

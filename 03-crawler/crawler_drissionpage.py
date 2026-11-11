@@ -14,13 +14,15 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 import logging
+import os
 import random
 import re
 import sys
 import time
 from pathlib import Path
-from urllib.parse import urljoin
+from urllib.parse import urljoin, quote
 
 import requests
 from DrissionPage import ChromiumOptions, ChromiumPage
@@ -312,6 +314,15 @@ def read_detail(page: ChromiumPage, url: str, wait_disqus: bool) -> dict:
                 break
             time.sleep(0.5)
 
+    # Disqus keys its counter API on this string, not on the page URL.
+    ident = ""
+    try:
+        mi = re.search(r"this\.page\.identifier\s*=\s*'([^']*)'", page.html or "")
+        if mi:
+            ident = mi.group(1)
+    except Exception:  # noqa: BLE001 - identifier is optional
+        pass
+
     return {
         "Title": title,
         "Author": author,
@@ -321,7 +332,64 @@ def read_detail(page: ChromiumPage, url: str, wait_disqus: bool) -> dict:
         "Images In Article": len(image_urls),
         "Image URLs": " | ".join(image_urls),
         "URL": url,
+        "_identifier": ident,
     }
+
+
+DISQUS_COUNT_URL = "https://mitadmissions.disqus.com/count-data.js"
+
+
+def resolve_proxy(cli_value: str | None) -> str | None:
+    if cli_value:
+        return cli_value
+    for key in ("HTTPS_PROXY", "https_proxy", "HTTP_PROXY", "http_proxy"):
+        value = os.environ.get(key)
+        if value:
+            return value
+    return None
+
+
+def fetch_comment_counts(rows: list[dict], proxy: str | None) -> int:
+    """Fill Comment Count from the Disqus counter endpoint.
+
+    The in-page counter (`#disqus_thread a`) is injected by embed.js and never
+    resolves in headless mode even through a working proxy, so the number is
+    fetched over HTTP against the same thread identifier. One request per
+    article, failures leave the row at its existing value.
+    """
+    sess = requests.Session()
+    sess.trust_env = False  # do not merge the host-injected proxy with ours
+    if proxy:
+        sess.proxies = {"http": proxy, "https": proxy}
+    sess.headers.update({"User-Agent": USER_AGENT, "Referer": BASE_URL})
+
+    resolved = 0
+    for row in rows:
+        ident = row.get("_identifier") or ""
+        if not ident:
+            continue
+        # The proxy drops a request now and then (measured ~1 in 15); retry
+        # rather than silently leaving a wrong 0 in a data column.
+        for attempt in range(3):
+            try:
+                resp = sess.get(f"{DISQUS_COUNT_URL}?1={quote(ident, safe='')}", timeout=15)
+                resp.raise_for_status()
+                m = re.search(r'"counts":\s*(\[.*?\])', resp.text, re.S)
+                if not m:
+                    break
+                arr = json.loads(m.group(1))
+                if arr:
+                    row["Comment Count"] = int(arr[0].get("comments", 0))
+                resolved += 1
+                break
+            except Exception as exc:  # noqa: BLE001
+                if attempt == 2:
+                    log.warning("  comment lookup failed for %s: %s: %s",
+                                row.get("URL", "?"), type(exc).__name__, str(exc)[:100])
+                else:
+                    time.sleep(1.0)
+    log.info("comment counts resolved via Disqus API: %d/%d", resolved, len(rows))
+    return resolved
 
 
 def read_detail_retry(page: ChromiumPage, url: str, wait_disqus: bool, retries: int = 1) -> dict | None:
@@ -346,14 +414,19 @@ def main() -> int:
     ap.add_argument("--log", default="run_drissionpage.log", help="log file path")
     ap.add_argument("--headless", default="1", help="1 = headless (default), 0 = show browser")
     ap.add_argument("--slow", type=float, default=1.4, help="base sleep seconds between articles")
+    ap.add_argument("--proxy", default=None,
+                    help="HTTP proxy for the Disqus counter API (defaults to $HTTPS_PROXY)")
     args = ap.parse_args()
 
     setup_logging(Path(args.log))
     log.info("start: limit=%d out=%s", args.limit, args.out)
 
+    proxy = resolve_proxy(args.proxy)
+    if proxy:
+        log.info("using proxy for Disqus: %s", proxy)
     wait_disqus = disqus_alive()
     if not wait_disqus:
-        log.info("skip Disqus wait, comment counts will be 0")
+        log.info("in-page Disqus counter unavailable, will use the counter API instead")
 
     rows: list[dict] = []
     started = time.time()
@@ -397,9 +470,11 @@ def main() -> int:
             except Exception:  # noqa: BLE001
                 pass
 
+    fetch_comment_counts(rows, proxy)
+
     out_path = Path(args.out)
     with out_path.open("w", newline="", encoding="utf-8-sig") as fh:
-        writer = csv.DictWriter(fh, fieldnames=HEADERS)
+        writer = csv.DictWriter(fh, fieldnames=HEADERS, extrasaction="ignore")
         writer.writeheader()
         writer.writerows(rows)
 

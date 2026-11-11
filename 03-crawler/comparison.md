@@ -31,7 +31,7 @@
 | 实际行数 | 20 | 20 |
 | 覆盖时间范围 | 2026-10-17 ~ 2026-11-10 | 同左 |
 | 不同作者数 | 15 | 15 |
-| 总耗时（脚本自带计时） | **91.8 s** | **150.5 s** |
+| 总耗时（脚本自带计时） | **179.7 s** | **104.0 s** |
 | 平均单篇耗时 | ≈ 4.6 s（含 1.4~2.0 s 限速 sleep 与分页遍历） | ≈ 7.5 s（含同样 sleep） |
 | 重试次数 / 失败行数 | 0 / 0 | 0 / 0 |
 
@@ -45,7 +45,7 @@
 | --- | --- | --- |
 | Title | 20/20（100%） | 20/20（100%） |
 | Author | 20/20（100%） | 20/20（100%） |
-| Comment Count | 0/20（**全部为 0**） | 0/20（**全部为 0**） |
+| Comment Count | **20/20（全部非零）** | **20/20（全部非零）** |
 | Time | 20/20（100%） | 20/20（100%） |
 | Article Content | 20/20（100%） | 20/20（100%） |
 | Images In Article | 20/20 有值，其中 16 篇 > 0（80%） | 20/20 有值，其中 16 篇 > 0（80%） |
@@ -56,17 +56,34 @@
 - 正文长度：Playwright 平均 4754 字符（34 ~ 8004），DrissionPage 平均 4907 字符（34 ~ 8004）；两者都有 6 篇触发 8000 字符截断。
 - 最短的 34 字符那篇是漫画博客 `dream`，正文确实只有一句图注，其余内容都在图里 —— 属于真实数据，不是抓取失败。
 
-### Comment Count 为什么全是 0
+### Comment Count 的取值路径（含一次失败与修正）
 
-评论数**不在服务端 HTML 里**。页面只留下一个 `<div id="disqus_thread">` 占位符，数字由 `https://mitadmissions.disqus.com/embed.js` / `count.js` 在浏览器里异步写回。本机实测（`requests.head` + 两个爬虫内部的探活逻辑）：
+评论数**不在服务端 HTML 里**：页面只留 `<div id="disqus_thread">` 占位符，数字由 `embed.js` /
+`count.js` 在浏览器里异步写回。
 
-```
-disqus.com unreachable (ReadTimeout / ConnectionError: ProxyError)
-```
+**第一次运行（无代理）**：本机到 `disqus.com` 不可达（`ReadTimeout` / `ProxyError`），该字段只能
+写 0。当时在 README 与本文中如实标注为"环境限制"，没有伪造数字。
 
-即 **disqus.com 在当前网络下不可达**，所以 `<a href="#disqus_thread">` 的文本始终为空，两个爬虫都只能写 0。
+**第二次运行（开启代理后）**：两条路径都试过，结论不同，值得记录：
 
-代码里保留了完整逻辑：探活成功时会等待 `#disqus_thread a` 出现数字并用正则 `([\d,]+)` 解析（"12 Comments" → 12），探活失败则跳过等待，避免每篇白等 6 秒。换一台能访问 Disqus 的机器，同一份代码即可拿到真实评论数，无需改动。
+| 路径 | 结果 |
+| --- | --- |
+| ① 页面内等 `#disqus_thread a` 渲染出文本 | headless Chrome 下等 15 s 仍然是空锚点，**即使代理工作正常**。Disqus 的 embed 在 headless / 无痕环境不稳定，不能作为数据源。 |
+| ② 官方计数端点 `mitadmissions.disqus.com/count-data.js?1=<identifier>` | 稳定返回权威数字。**注意 identifier 不是 URL**，而是页面中 `this.page.identifier`（形如 `129942 https://mitadmissions.org/?p=129942`），必须从详情页 HTML 里正则提取。 |
+
+两个脚本最终都走路径 ②，各 20 次请求全部命中（日志 `comment counts resolved via Disqus API: 20/20`），
+且两份 CSV **逐篇数值完全一致**：
+
+| 指标 | 值 |
+| --- | --- |
+| 非零评论篇数 | 20 / 20 |
+| 合计评论数 | **99** |
+| 最多 | `dream` **21 条**（一篇只有一句话 + 手绘图的漫画博客，评论区反而最热） |
+| 最少 | 1 条（9 篇） |
+
+工程细节：代理链路对单次 HTTPS 握手约有 1/15 的概率断开（实测 14/15 成功），因此查询内置
+3 次重试；同时把 `requests.Session.trust_env` 设为 `False`，避免宿主注入的 `HTTP(S)_PROXY`
+与显式代理合并后触发 `SSLEOFError`。
 
 ## 4. 两个 CSV 的一致性
 

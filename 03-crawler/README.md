@@ -128,30 +128,43 @@ Measured on this machine, 2026-11-11:
 | Distinct authors | 15 | 15 |
 | Total images | 219 (max 59 in one post, 16/20 posts have ≥1 image) | 219 (identical) |
 | Body length | avg 4754, max 8004 (6 rows truncated) | avg 4907, max 8004 (6 rows truncated) |
-| Comment counts | all `0` | all `0` |
-| Wall clock | 91.8 s | 150.5 s (219 s on an earlier run — network dependent) |
+| Comment counts | 20/20 non-zero, **99 total** | identical row by row |
+| Wall clock | 179.7 s | 150.5 s / 104.0 s (network dependent) |
 
-### Why `Comment Count` is 0 for every row
+### How `Comment Count` is obtained
 
-The comment count is **not in the server HTML**. The page only ships an empty
+The count is **not in the server HTML**. The page only ships an empty
 `<div id="disqus_thread"></div>`; the number is injected by
-`https://mitadmissions.disqus.com/embed.js` / `count.js` after the page loads.
+`https://mitadmissions.disqus.com/embed.js` / `count.js` after load.
 
-From this machine `disqus.com` is unreachable — both crawlers run a one-shot probe with
-`requests.head("https://disqus.com/", timeout=4)` at start-up and log:
+Two approaches were tried, and only one of them is reliable:
 
+| Approach | Result |
+| --- | --- |
+| Wait for `#disqus_thread a` to contain a digit in headless Chrome | **Unreliable.** Waits 15 s and still returns an empty anchor, *even when the proxy works*. Disqus' embed does not render in headless/incognito contexts. |
+| Query the official counter endpoint `mitadmissions.disqus.com/count-data.js?1=<identifier>` | **Reliable.** Returns the authoritative number in one request, no JS involved. |
+
+The identifier matters: it is **not** the article URL but the value of `this.page.identifier`
+inside the page (`129942 https://mitadmissions.org/?p=129942`), captured with a regex while the
+detail page is open.
+
+Both crawlers use the counter endpoint; each resolved **20/20** rows and the two CSVs agree
+row by row (99 comments total, max 21 on the `dream` comic post). Requires outbound access to
+`disqus.com`, which is why the script takes `--proxy`:
+
+```bash
+python crawler_playwright.py  --limit 20 --proxy http://127.0.0.1:7897
+python crawler_drissionpage.py --limit 20 --proxy http://127.0.0.1:7897
 ```
-disqus.com unreachable (ReadTimeout / ConnectionError: ProxyError) -> comment counts stay 0
-```
 
-Because the probe fails, the per-article wait is skipped (otherwise every article would burn
-an extra 6 s for nothing) and the column is written as `0`.
+Two implementation notes learned the hard way:
 
-The parsing logic is fully implemented and would work unchanged on a machine that can reach
-Disqus: it waits for `#disqus_thread a` to contain a digit, parses `([\d,]+)` (so "12 Comments"
-becomes `12`), and falls back to the list-page `.tease__comment-text a` value. Nothing was
-fabricated: `0` here genuinely means "not observable from this network", and this README is
-the note required by the task for a field that cannot be resolved honestly.
+- The proxy drops roughly 1 in 15 TLS handshakes, so each lookup retries up to 3 times.
+- `requests.Session.trust_env = False` is required: otherwise the host-injected `HTTP(S)_PROXY`
+  is merged with the explicit proxy and produces intermittent `SSLEOFError`.
+
+Without a proxy the column falls back to `0` and the log says so explicitly — it never
+fabricates a number.
 
 ### Content correctness spot-checks
 
