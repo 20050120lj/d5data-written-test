@@ -108,8 +108,8 @@ conversation is about returns") while the taxonomy is remedy-level. Second, **th
 9 real annotation errors in 120 rows (7.5 %)** that the original pipeline had missed.
 
 **Where the model is strong.** Explicit-remedy turns ("能换货吗" / "我要退货" / "我要求赔偿")
-are near-perfect. Schema compliance was 120/120, with zero retries needed and zero
-out-of-enum outputs.
+are near-perfect. All 120 outputs validated against the closed schema on the first pass
+(no out-of-enum values, no missing keys), so no post-hoc coercion was needed anywhere.
 
 **Where it fails or is weakest.**
 
@@ -124,10 +124,12 @@ out-of-enum outputs.
 3. **Complaint vs. root cause.** "物流太慢，我要投诉" is both a `logistics` incident and a
    `complaint` act. The model picks the root cause; the source picks the act. Neither is wrong;
    the label space needs a second axis (see §6).
-4. **Templated replies.** 96 % of agent replies are near-identical boilerplate, so
-   `agent_action` collapses to `guide_process` (54 %) and `propose_solution` (44 %). The
-   dimension is measurable but carries little information — a finding about the *corpus*, not
-   the model.
+4. **Templated replies.** 72.3 % of the 997 replies open with an apology and 72.5 % start with
+   "亲", yet only 3 of 997 are byte-identical — it is template *structure* with variable
+   filling, not copy-paste. Consequence: `agent_action` collapses to `guide_process` (54 %) and
+   `propose_solution` (44 %), with `empathize` down to 2 %. The dimension is measurable but
+   carries almost no information. That is a finding about the *corpus*, not about the model —
+   and it is why §6.2 proposes auditing `tone` properly instead of discarding it.
 
 **Calibration** — monotone, which is what makes deployment possible:
 
