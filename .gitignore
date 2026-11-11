@@ -28,3 +28,7 @@ Thumbs.db
 
 # --- scratch ---
 *.tmp
+
+# --- run caches (regenerable) ---
+06-auto-labeling/output/.label_cache.jsonl
+06-auto-labeling/output/*.tmp
