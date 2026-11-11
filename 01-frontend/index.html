@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Upload Your Resume</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<main class="page">
+
+  <!-- ============ LEFT: copy + illustration ============ -->
+  <section class="intro" aria-labelledby="page-title">
+    <p class="step">Finish!</p>
+    <h1 id="page-title">Upload Your Resume</h1>
+    <p class="lede">
+      Upload your resume for the role you are applying for and get a chance to
+      talk to our team. We review every application within two business days.
+    </p>
+
+    <div class="art" aria-hidden="true">
+      <svg viewBox="0 0 440 400" role="presentation" focusable="false">
+        <defs>
+          <linearGradient id="phoneTint" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"  stop-color="#eaf4ff"/>
+            <stop offset="100%" stop-color="#ffffff"/>
+          </linearGradient>
+          <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+            <feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#0b4fd0" flood-opacity="0.12"/>
+          </filter>
+        </defs>
+
+        <!-- feather, clear of everything else (top right) -->
+        <g class="feather">
+          <path d="M392 52 C412 92 410 158 380 196 C372 152 372 92 392 52 Z"
+                fill="#ffffff" stroke="#c3cfdd" stroke-width="2.2"/>
+          <path d="M389 66 C381 108 377 156 379 190" stroke="#c3cfdd" stroke-width="1.6" fill="none"/>
+          <path d="M385 96 C393 99 400 96 405 90 M379 126 C387 129 394 126 399 120
+                   M376 156 C383 159 390 156 395 150" stroke="#dbe4ef" stroke-width="1.5" fill="none"/>
+        </g>
+
+        <!-- phone -->
+        <g filter="url(#soft)">
+          <rect x="222" y="112" width="134" height="220" rx="22"
+                fill="url(#phoneTint)" stroke="#0087ff" stroke-width="5"/>
+          <rect x="234" y="138" width="110" height="32" rx="16" fill="#ffffff" stroke="#dbe8f7"/>
+          <rect x="234" y="180" width="110" height="32" rx="16" fill="#ffffff" stroke="#dbe8f7"/>
+          <rect x="234" y="222" width="110" height="32" rx="16" fill="#ffffff" stroke="#dbe8f7"/>
+          <rect x="234" y="282" width="70"  height="14" rx="7"  fill="#d9ecff"/>
+          <rect x="234" y="304" width="44"  height="14" rx="7"  fill="#e8f4ff"/>
+        </g>
+
+        <!-- cat -->
+        <g class="cat">
+          <!-- tail: thick curl, drawn first so the body covers its root -->
+          <path d="M116 326 C64 330 30 292 38 250 C44 216 70 198 94 208"
+                fill="none" stroke="#0087ff" stroke-width="23" stroke-linecap="round"/>
+          <!-- body -->
+          <ellipse cx="152" cy="300" rx="57" ry="66" fill="#0087ff"/>
+          <!-- head -->
+          <circle cx="170" cy="212" r="52" fill="#0087ff"/>
+          <!-- ears -->
+          <path d="M132 176 L126 132 L170 158 Z" fill="#0087ff"/>
+          <path d="M210 174 L220 132 L178 156 Z" fill="#0087ff"/>
+          <!-- muzzle -->
+          <ellipse cx="178" cy="230" rx="31" ry="22" fill="#ffffff"/>
+          <!-- eyes -->
+          <ellipse cx="154" cy="203" rx="9.5" ry="11.5" fill="#ffffff"/>
+          <ellipse cx="193" cy="203" rx="9.5" ry="11.5" fill="#ffffff"/>
+          <circle cx="155" cy="205" r="4.8" fill="#0d1b2a"/>
+          <circle cx="194" cy="205" r="4.8" fill="#0d1b2a"/>
+          <!-- nose + mouth -->
+          <path d="M178 221 l-6 5 h12 z" fill="#0d1b2a" opacity=".72"/>
+          <path d="M178 228 v4 M178 232 q-8 7 -14 0 M178 232 q8 7 14 0"
+                stroke="#0d1b2a" stroke-width="1.9" fill="none" stroke-linecap="round" opacity=".58"/>
+          <!-- subtle belly patch, low on the body so it does not read as an object -->
+          <ellipse cx="152" cy="348" rx="26" ry="15" fill="#ffffff" opacity=".14"/>
+        </g>
+
+        <!-- white bubble with loading dots -->
+        <g class="bubble bubble--light" filter="url(#soft)">
+          <rect x="112" y="22" width="152" height="74" rx="16"
+                fill="#ffffff" stroke="#cfd9e6" stroke-width="2"/>
+          <path d="M186 96 l-8 22 l26 -22 z" fill="#ffffff" stroke="#cfd9e6" stroke-width="2"
+                stroke-linejoin="round"/>
+          <circle cx="154" cy="59" r="5.5" fill="none" stroke="#9fb3c8" stroke-width="2"/>
+          <circle cx="178" cy="59" r="5.5" fill="none" stroke="#9fb3c8" stroke-width="2"/>
+          <circle cx="202" cy="59" r="5.5" fill="none" stroke="#9fb3c8" stroke-width="2"/>
+          <circle cx="226" cy="59" r="5.5" fill="none" stroke="#9fb3c8" stroke-width="2"/>
+        </g>
+
+        <!-- dark bubble with typing dots -->
+        <g class="bubble bubble--dark" filter="url(#soft)">
+          <rect x="268" y="198" width="106" height="66" rx="14" fill="#3b3f46"/>
+          <path d="M276 264 l-14 18 l28 -12 z" fill="#3b3f46"/>
+          <circle cx="296" cy="231" r="5.2" fill="#ffffff"/>
+          <circle cx="321" cy="231" r="5.2" fill="#ffffff"/>
+          <circle cx="346" cy="231" r="5.2" fill="#ffffff"/>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ============ RIGHT: upload card ============ -->
+  <section class="card" aria-labelledby="card-title">
+    <h2 id="card-title">Upload file</h2>
+
+    <!-- Dropzone is a real <label for>, so clicking it opens the file dialog
+         without any JS, and keyboard users get the same behaviour via Enter/Space. -->
+    <label class="dropzone" id="dropzone" for="file-input" tabindex="0">
+      <input type="file" id="file-input" accept=".pdf,.doc,.docx,.rtf,.txt" hidden>
+
+      <svg class="cloud" viewBox="0 0 64 48" aria-hidden="true">
+        <path d="M46 46H18a12 12 0 0 1-1.6-23.9A17 17 0 0 1 48.7 20A13 13 0 0 1 46 46Z"
+              fill="none" stroke="currentColor" stroke-width="3.4"
+              stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M32 34V18m0 0-6.5 6.5M32 18l6.5 6.5" fill="none" stroke="currentColor"
+              stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+
+      <p class="dz-line">Drag and drop your resume, or <span class="link">click here to upload</span></p>
+      <p class="dz-hint">File size not more than 5MB</p>
+
+      <p class="dz-file" id="file-name" role="status" aria-live="polite" hidden></p>
+    </label>
+
+    <div class="actions">
+      <button type="button" class="btn btn--ghost" id="last-step">Last step</button>
+      <button type="button" class="btn btn--primary" id="finish">Finish</button>
+    </div>
+
+    <ol class="steps" aria-label="Step 3 of 3">
+      <li class="steps__dot" aria-current="step"></li>
+      <li class="steps__dot"></li>
+      <li class="steps__dot"></li>
+    </ol>
+  </section>
+
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>

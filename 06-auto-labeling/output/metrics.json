@@ -1,0 +1,94 @@
+{
+  "n_llm": 120,
+  "n_corpus": 997,
+  "issue_family_agreement": 0.6833,
+  "issue_family_kappa": 0.537,
+  "issue_family_confusion": {
+    "return->quality": 16,
+    "compensation->quality": 5,
+    "compensation->return": 4,
+    "complaint->logistics": 4,
+    "complaint->quality": 3,
+    "quality->return": 2,
+    "compensation->complaint": 1,
+    "complaint->compensation": 1,
+    "compensation->logistics": 1,
+    "quality->complaint": 1
+  },
+  "tone_twisted_rows": 15,
+  "tone_twisted_rate": 0.125,
+  "tone_vs_emotion_agreement": 0.5333,
+  "tone_vs_emotion_kappa": 0.0,
+  "llm_vs_rule_issue_exact": 0.6667,
+  "llm_vs_rule_issue_family": 0.7,
+  "llm_vs_rule_issue_kappa": 0.5986,
+  "llm_vs_rule_emotion": 0.7,
+  "calibration": {
+    "0.0-0.5": {
+      "n": 0,
+      "agreement": null
+    },
+    "0.5-0.7": {
+      "n": 7,
+      "agreement": 0.143
+    },
+    "0.7-0.9": {
+      "n": 63,
+      "agreement": 0.571
+    },
+    "0.9-1.0": {
+      "n": 50,
+      "agreement": 0.9
+    }
+  },
+  "adjudication": {
+    "n_disagreements": 38,
+    "model_correct": 9,
+    "dimension_diff": 29,
+    "source_correct": 0,
+    "model_error_rate_on_sample": 0.0,
+    "effective_accuracy_after_adjudication": 0.7583,
+    "source_label_error_rate_in_disagreements": 0.2368
+  },
+  "hitl_workflow": {
+    "0.50": {
+      "coverage": 1.0,
+      "agreement_on_auto": 0.683,
+      "n_review": 0
+    },
+    "0.60": {
+      "coverage": 0.992,
+      "agreement_on_auto": 0.689,
+      "n_review": 1
+    },
+    "0.70": {
+      "coverage": 0.942,
+      "agreement_on_auto": 0.717,
+      "n_review": 7
+    },
+    "0.80": {
+      "coverage": 0.717,
+      "agreement_on_auto": 0.814,
+      "n_review": 34
+    },
+    "0.90": {
+      "coverage": 0.417,
+      "agreement_on_auto": 0.9,
+      "n_review": 70
+    },
+    "0.95": {
+      "coverage": 0.017,
+      "agreement_on_auto": 1.0,
+      "n_review": 118
+    }
+  },
+  "rule_flag_rate": 0.0502,
+  "rule_flag_top": {
+    "compensation->quality": 17,
+    "complaint->quality": 8,
+    "complaint->logistics": 6,
+    "quality->return": 5,
+    "compensation->return": 5,
+    "compensation->complaint": 4
+  }
+}

@@ -1,0 +1,17 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: hello-security
+
+app:
+  jwt:
+    # HMAC-SHA256 requires a key of at least 256 bits; this literal is 64 chars (512 bits).
+    secret: "change-me-in-production-0123456789abcdefghijklmnopqrstuvwxyz-ABCDEF"
+    # Token time-to-live in milliseconds (1 hour).
+    expiration-ms: 3600000
+
+logging:
+  level:
+    org.springframework.security: INFO

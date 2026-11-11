@@ -1,0 +1,30 @@
+# --- build output ---
+target/
+build/
+dist/
+*.class
+*.jar
+!**/maven-wrapper.jar
+
+# --- python ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# --- node ---
+node_modules/
+
+# --- editors / os ---
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# --- crawl debug dumps (large, regenerable) ---
+03-crawler/debug_*.html
+03-crawler/test_*.csv
+03-crawler/test_*.log
+
+# --- scratch ---
+*.tmp

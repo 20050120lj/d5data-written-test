@@ -1,0 +1,6 @@
+﻿source \ pred,return,quality,logistics,compensation,complaint,pre_sale,other,row_total
+return,47,16,0,0,0,0,0,63
+quality,2,12,0,0,1,0,0,15
+compensation,4,5,1,3,1,0,0,14
+complaint,0,3,4,1,20,0,0,28
+col_total,53,36,5,4,22,0,0,120

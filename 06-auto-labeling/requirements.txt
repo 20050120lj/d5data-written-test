@@ -1,0 +1,3 @@
+# Intentionally empty: demo_code.py, prepare_sample.py and evaluate.py
+# run on the Python 3.10+ standard library only (urllib, json, csv, concurrent.futures).
+# Nothing to install. If you prefer the openai SDK, see the note in README.md.

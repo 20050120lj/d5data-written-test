@@ -1,0 +1,73 @@
+Picked up JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF-8
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------------< com.d5data:hello-security >----------------------
+[INFO] Building hello-security 1.0.0
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.3.2:clean (default-clean) @ hello-security ---
+[INFO] Deleting C:\Users\lj20050120\Desktop\笔试\题目作业\02-backend\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ hello-security ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ hello-security ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 10 source files with javac [debug release 17] to target\classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ hello-security ---
+[INFO] skip non existing resourceDirectory C:\Users\lj20050120\Desktop\笔试\题目作业\02-backend\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ hello-security ---
+[INFO] Changes detected - recompiling the module! :dependency
+[INFO] Compiling 1 source file with javac [debug release 17] to target\test-classes
+[INFO] 
+[INFO] --- surefire:3.1.2:test (default-test) @ hello-security ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+Picked up JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF-8
+[INFO] Running com.d5data.hellosecurity.HelloSecurityApplicationTests
+19:39:37.521 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.d5data.hellosecurity.HelloSecurityApplicationTests]: HelloSecurityApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+19:39:37.644 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.d5data.hellosecurity.HelloSecurityApplication for test class com.d5data.hellosecurity.HelloSecurityApplicationTests
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.0)
+
+2026-11-11T19:39:38.220+08:00  INFO 4700 --- [hello-security] [           main] c.d.h.HelloSecurityApplicationTests      : Starting HelloSecurityApplicationTests using Java 17.0.20.1 with PID 4700 (started by lj20050120 in C:\Users\lj20050120\Desktop\笔试\题目作业\02-backend)
+2026-11-11T19:39:38.222+08:00  INFO 4700 --- [hello-security] [           main] c.d.h.HelloSecurityApplicationTests      : No active profile set, falling back to 1 default profile: "default"
+2026-11-11T19:39:40.288+08:00  INFO 4700 --- [hello-security] [           main] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@1f43cab7, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@481558ce, org.springframework.security.web.context.SecurityContextHolderFilter@484149eb, org.springframework.security.web.header.HeaderWriterFilter@6cfbbff7, org.springframework.web.filter.CorsFilter@2668c286, org.springframework.security.web.authentication.logout.LogoutFilter@43ac0a68, com.d5data.hellosecurity.security.JwtAuthenticationFilter@7f353a0f, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@61874b9d, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@d611f1c, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@7ea2412c, org.springframework.security.web.session.SessionManagementFilter@45b32dfe, org.springframework.security.web.access.ExceptionTranslationFilter@56846330, org.springframework.security.web.access.intercept.AuthorizationFilter@7bc58891]
+2026-11-11T19:39:40.673+08:00  INFO 4700 --- [hello-security] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-11-11T19:39:40.673+08:00  INFO 4700 --- [hello-security] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-11T19:39:40.675+08:00  INFO 4700 --- [hello-security] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 2 ms
+2026-11-11T19:39:40.709+08:00  INFO 4700 --- [hello-security] [           main] c.d.h.HelloSecurityApplicationTests      : Started HelloSecurityApplicationTests in 2.895 seconds (process running for 3.837)
+Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+2026-11-11T19:39:41.619+08:00  WARN 4700 --- [hello-security] [           main] o.s.w.s.h.HandlerMappingIntrospector     : Cache miss for REQUEST dispatch to '/api/login' (previous null). Performing CorsConfiguration lookup. This is logged once only at WARN level, and every time at TRACE.
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.878 s -- in com.d5data.hellosecurity.HelloSecurityApplicationTests
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- jar:3.3.0:jar (default-jar) @ hello-security ---
+[INFO] Building jar: C:\Users\lj20050120\Desktop\笔试\题目作业\02-backend\target\hello-security-1.0.0.jar
+[INFO] 
+[INFO] --- spring-boot:3.2.0:repackage (repackage) @ hello-security ---
+[INFO] Replacing main artifact C:\Users\lj20050120\Desktop\笔试\题目作业\02-backend\target\hello-security-1.0.0.jar with repackaged archive, adding nested dependencies in BOOT-INF/.
+[INFO] The original artifact has been renamed to C:\Users\lj20050120\Desktop\笔试\题目作业\02-backend\target\hello-security-1.0.0.jar.original
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  10.646 s
+[INFO] Finished at: 2026-11-11T19:39:43+08:00
+[INFO] ------------------------------------------------------------------------

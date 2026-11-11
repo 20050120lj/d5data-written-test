@@ -1,0 +1,104 @@
+==============================================================
+ Verification log - Spring Boot 3.2.0 secured Hello World API
+ Generated: 2026-11-11 19:40:01 +0800
+ Runtime  : java version "17.0.20.1" 2026-08-18 LTS
+ App      : java -jar target/hello-security-1.0.0.jar --server.port=8080
+ Startup  : Started HelloSecurityApplication in 4.25 seconds
+==============================================================
+
+### 1) GET /api/hello without credentials -> expect 401
+$ curl -i http://localhost:8080/api/hello
+HTTP/1.1 401 
+Vary: Origin
+Vary: Access-Control-Request-Method
+Vary: Access-Control-Request-Headers
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Content-Type: application/json;charset=UTF-8
+Content-Length: 194
+Date: Wed, 11 Nov 2026 11:40:02 GMT
+
+{"timestamp":"2026-11-11T11:40:02.118506100Z","status":401,"error":"Unauthorized","message":"Authentication required: provide a valid 'Authorization: Bearer <token>' header","path":"/api/hello"}
+
+### 2) POST /api/login with correct credentials -> expect 200 + token
+$ curl -i -X POST http://localhost:8080/api/login -H "Content-Type: application/json" -d '{"username":"test","password":"123456"}'
+HTTP/1.1 200 
+Vary: Origin
+Vary: Access-Control-Request-Method
+Vary: Access-Control-Request-Headers
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Content-Type: application/json
+Transfer-Encoding: chunked
+Date: Wed, 11 Nov 2026 11:40:02 GMT
+
+{"token":"eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0IiwiaWF0IjoxNzk0Mzk3MjAyLCJleHAiOjE3OTQ0MDA4MDJ9.0kTOZktu2yJz-tnjFEIRmVWm1N_e7tmVibpxdH4aYiIeYL4lo24VKbiBYOl2SCOFRmw3k3DVyzbFDqW_nQJQUQ","tokenType":"Bearer","expiresInMs":3600000}
+
+
+### 3) POST /api/login with wrong password -> expect 401
+$ curl -i -X POST http://localhost:8080/api/login -H "Content-Type: application/json" -d '{"username":"test","password":"wrong"}'
+HTTP/1.1 401 
+Vary: Origin
+Vary: Access-Control-Request-Method
+Vary: Access-Control-Request-Headers
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Content-Type: application/json
+Transfer-Encoding: chunked
+Date: Wed, 11 Nov 2026 11:40:02 GMT
+
+{"status":401,"error":"Unauthorized","message":"Invalid username or password"}
+
+### 4) GET /api/hello with the token issued in step 2 -> expect 200 and body exactly "Hello World"
+$ curl -i http://localhost:8080/api/hello -H "Authorization: Bearer <token>"
+   (token = eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJ0ZXN0Iiw...)
+HTTP/1.1 200 
+Vary: Origin
+Vary: Access-Control-Request-Method
+Vary: Access-Control-Request-Headers
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Content-Type: text/plain;charset=UTF-8
+Content-Length: 11
+Date: Wed, 11 Nov 2026 11:40:02 GMT
+
+Hello World
+
+### 5) Extra: GET /api/hello with a tampered token -> expect 401
+$ curl -i http://localhost:8080/api/hello -H "Authorization: Bearer tampered.token.value"
+HTTP/1.1 401 
+Vary: Origin
+Vary: Access-Control-Request-Method
+Vary: Access-Control-Request-Headers
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Content-Type: application/json;charset=UTF-8
+Content-Length: 194
+Date: Wed, 11 Nov 2026 11:40:02 GMT
+
+{"timestamp":"2026-11-11T11:40:03.025125400Z","status":401,"error":"Unauthorized","message":"Authentication required: provide a valid 'Authorization: Bearer <token>' header","path":"/api/hello"}
+
+### Exact body assertion for step 4
+response body : [Hello World]
+expected body : [Hello World]
+RESULT        : MATCH
